@@ -5,6 +5,7 @@ const typeDefs = `
     type Query {
         me: User!
         post: Post
+        add(num1: Float!, num2: Float!): Float # ! beside argument type denotes that it is required
     }
 
     type User {
@@ -41,6 +42,9 @@ const resolvers = {
         published: true,
       };
     },
+    add(parent, args, ctx, info) {
+        return args.num1 + args.num2;
+    }
   },
 };
 
