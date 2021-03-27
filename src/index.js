@@ -5,7 +5,7 @@ const typeDefs = `
     type Query {
         me: User!
         post: Post
-        add(num1: Float!, num2: Float!): Float # ! beside argument type denotes that it is required
+        add(numbers: [Float!]!): Float
     }
 
     type User {
@@ -43,7 +43,11 @@ const resolvers = {
       };
     },
     add(parent, args, ctx, info) {
-        return args.num1 + args.num2;
+        if(!args.numbers.length) return 0;
+
+        return args.numbers.reduce((accumulator, currentValue) => {
+            return accumulator + currentValue;
+        })
     }
   },
 };
