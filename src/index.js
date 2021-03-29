@@ -29,6 +29,7 @@ const posts = [
     body:
       "quia et suscipit\nsuscipit recusandae consequuntur expedita et cum\nreprehenderit molestiae ut ut quas totam\nnostrum rerum est autem sunt rem eveniet architecto",
     published: true,
+    author: "abc_1",
   },
   {
     id: 2,
@@ -36,6 +37,7 @@ const posts = [
     body:
       "est rerum tempore vitae\nsequi sint nihil reprehenderit dolor beatae ea dolores neque\nfugiat blanditiis voluptate porro vel nihil molestiae ut reiciendis\nqui aperiam non debitis possimus qui neque nisi nulla",
     published: true,
+    author: "abc_1",
   },
   {
     id: 3,
@@ -43,9 +45,30 @@ const posts = [
     body:
       "et iusto sed quo iure\nvoluptatem occaecati omnis eligendi aut ad\nvoluptatem doloribus vel accusantium quis pariatur\nmolestiae porro eius odio et labore et velit aut",
     published: false,
+    author: "abc_2",
   },
 ];
 
+const comments = [
+  {
+    id: "c1",
+    text: "Comment 1",
+    author: "abc_1",
+    post: 1,
+  },
+  {
+    id: "c2",
+    text: "Comment 2",
+    author: "abc_1",
+    post: 1,
+  },
+  {
+    id: "c3",
+    text: "Comment 3",
+    author: "abc_2",
+    post: 2,
+  },
+];
 // Type definition (schema)
 const typeDefs = `
     type Query {
@@ -53,7 +76,8 @@ const typeDefs = `
         post: Post
         add(numbers: [Float!]!): Float
         users(query: String): [User]!
-        posts(query: String): [Post]!
+        posts(query: String): [Post!]!
+        comments: [Comment!]!
     }
 
     type User {
@@ -61,6 +85,8 @@ const typeDefs = `
         name: String!
         email: String!
         age: Int
+        posts: [Post]!
+        comments: [Comment]!
     }
 
     type Post {
@@ -68,6 +94,15 @@ const typeDefs = `
         title: String!
         body: String!
         published: Boolean
+        author: User!
+        comments: [Comment!]!
+    }
+
+    type Comment {
+        id: ID!
+        text: String!
+        author: User!
+        post: Post
     }
 `;
 
@@ -112,6 +147,33 @@ const resolvers = {
       return posts.filter(
         (user) => regexObj.test(user.title) || regexObj.test(user.body)
       );
+    },
+    comments() {
+      return comments;
+    },
+  },
+  Post: {
+    author(parent, args, ctx, info) {
+      return users.find((userObj) => userObj.id === parent.author);
+    },
+    comments(parent, args, ctx, info) {
+      return comments.filter((commentObj) => commentObj.post === parent.id);
+    },
+  },
+  User: {
+    posts(parent, args, ctx, info) {
+      return posts.filter((postObj) => postObj.author === parent.id);
+    },
+    comments(parent, args, ctx, info) {
+      return comments.filter((commentObj) => commentObj.author === parent.id);
+    },
+  },
+  Comment: {
+    author(parent, args, ctx, info) {
+      return users.find((userObj) => userObj.id === parent.author);
+    },
+    post(parent, args, ctx, info) {
+      return posts.find((postObj) => postObj.id === parent.post);
     },
   },
 };
